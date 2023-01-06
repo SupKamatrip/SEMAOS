@@ -2,10 +2,12 @@ import nmap
 import socket
 import requests
 import time
+from speedtest import Speedtest
+
 
 # Fonction pour scanner les machines du réseau
 def scan_network():
-    nm = nmap.PortScanner
+    nm = nmap.PortScanner()
     nm.scan(hosts='192.168.1.0/24', arguments='-sn')
     hosts_list = [(x, nm[x]['status']['state']) for x in nm.all_hosts()]
     return hosts_list
@@ -29,6 +31,13 @@ def get_public_ip():
         return (None, None)
 
 # Fonction pour tester le débit de la connexion Internet
+def test_download_speed():
+    try:
+        speed_test = Speedtest()
+        download_speed = speed_test.download()
+        return download_speed
+    except:
+        return None
 
 # Fonction pour mettre à jour le tableau de bord
 def update_dashboard():
@@ -36,9 +45,11 @@ def update_dashboard():
     ip_address = socket.gethostbyname(socket.gethostname())
     hostname = socket.gethostname()
     public_ip, domain_name = get_public_ip()
+    network_hosts = scan_network()
     # Récupération des informations sur la connexion Internet
     connection_status = 'Connecté' if test_latency() else 'Non connecté'
     latency = test_latency()
+    download_speed = test_download_speed()
 
     # Mise à jour du tableau de bord avec les informations récupérées
     dashboard_data = {
@@ -47,7 +58,8 @@ def update_dashboard():
         'IP publique de l\'accès Internet': public_ip,
         'Nom DNS dynamique': domain_name,
         'Etat de la connexion Internet': connection_status,
-
+        'Liste des machines détectées sur le réseau': network_hosts,
+        'Résultats du dernier test de débit': download_speed
     }
 
     # Afficher le tableau de bord ici
