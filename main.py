@@ -24,4 +24,3 @@ o Liste des machines détectées sur le réseau
 o Résultats du dernier test de débit
 '''
 
-
